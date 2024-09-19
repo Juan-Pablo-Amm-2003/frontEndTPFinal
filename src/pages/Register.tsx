@@ -1,27 +1,25 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../Routes/apiService";
 import { toast } from "react-toastify";
+import {LoginResponse} from "../interface/types"
 
 const Register: React.FC = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await registerUser({
-        username,
-        password,
-        email,
-      });
+      // Aquí aseguramos que se está enviando solo las propiedades necesarias
+      const response = await registerUser({ username, password, email });
+      localStorage.setItem("token", String(response.token));
 
-      localStorage.setItem("token", response.token);
       toast.success("Registration successful!");
-      navigate("/"); 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      navigate("/");
     } catch (error) {
       toast.error("Registration failed!");
     }

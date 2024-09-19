@@ -1,34 +1,27 @@
 import React from "react";
-import ProductList from "./products/ProductList";
-import ProductForm from "./products/ProductForm";
-import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
 
+const HomePage: React.FC = () => {
+  const { isAdmin } = useAuth();
+  const token = localStorage.getItem("token");
 
-const Home: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navbar Section */}
-   
+    <div>
+      <h1>Bienvenido a la tienda</h1>
 
-      {/* Main Content */}
-      <main className="flex-1">
-        <section className="py-8 bg-gray-50">
-          {/* Product List */}
-          <ProductList />
-        </section>
+      {token ? (
+        <button>Comprar</button>
+      ) : (
+        <p>Inicia sesión para comprar productos.</p>
+      )}
 
-        <section className="py-8">
-          {/* Product Form */}
-          <ProductForm />
-        </section>
-     
-     
-      </main>
-
-      {/* Footer */}
-      <Footer />
+      {isAdmin && (
+        <div>
+          <button>Agregar Producto (solo admin)</button>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Home;
+export default HomePage;

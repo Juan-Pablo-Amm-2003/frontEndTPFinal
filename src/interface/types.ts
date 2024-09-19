@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // types.ts
 export interface Product {
   id: number;
   name: string;
-  imagePath: string | null; // Puede ser null
+  price: number; // Ensure this is consistent
+  imagePath?: string; // Adjust to string | null if needed
   description: string;
-  price: string; // Asegúrate de que esto sea correcto
   stock: number;
 }
 
@@ -30,6 +31,7 @@ export interface LoginResponse {
 
 // Definición de la respuesta de registro
 export interface RegisterResponse {
+  token(arg0: string, token: any): unknown;
   id: string;
   username: string;
   email: string;

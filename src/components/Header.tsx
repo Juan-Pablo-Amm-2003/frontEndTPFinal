@@ -1,22 +1,35 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "./navbar/Navbar";
 import ProfileNavbar from "./navbar/ProfileNavbar";
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext";
+import {jwtDecode} from "jwt-decode"; // Asegúrate de importar jwt-decode
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth(); 
-  const token = localStorage.getItem("token");
+  const { isAdmin } = useAuth();
+  const token = localStorage.getItem("authToken");
 
   const handleLogout = () => {
-    // Eliminar datos del usuario del localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-
-    // Redirigir al usuario a la página de inicio de sesión
+    localStorage.removeItem("authToken"); // Cambiado a authToken
     navigate("/login");
   };
+
+  // Function to check token validity (e.g., expiration)
+  const isTokenValid = () => {
+    if (!token) return false;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const decodedToken: any = jwtDecode(token); // Decodifica el token
+      const exp = decodedToken.exp * 1000; // Convierte exp a milisegundos
+      return exp > Date.now();
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const isAuthenticated = token && isTokenValid();
 
   return (
     <header className="bg-indigo-600 text-white p-4 flex justify-between items-center">
@@ -24,7 +37,7 @@ const Header: React.FC = () => {
         My Store
       </Link>
       <div className="flex space-x-4">
-        {token ? (
+        {isAuthenticated ? (
           <>
             <button
               onClick={handleLogout}
@@ -34,7 +47,7 @@ const Header: React.FC = () => {
             </button>
             {isAdmin && (
               <Link
-                to="/admin/dashboard"
+                to="/adminHome"
                 className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition"
               >
                 Admin Dashboard

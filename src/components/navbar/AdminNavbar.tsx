@@ -1,3 +1,4 @@
+// src/components/AdminNavbar.tsx
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -12,12 +13,10 @@ const AdminNavbar: React.FC = () => {
   return (
     <nav className="bg-blue-800 text-white p-4 flex items-center justify-between">
       <div className="flex items-center space-x-4">
-        {/* Logo or App Name */}
-        <Link to="/" className="text-xl font-bold">
+        <Link to="/admin" className="text-xl font-bold">
           Admin Dashboard
         </Link>
 
-        {/* Navigation Links */}
         <div className="flex items-center space-x-4">
           <Link
             to="/admin/stats"
@@ -50,7 +49,6 @@ const AdminNavbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Logout Button */}
       <Link
         to="/logout"
         className="flex items-center space-x-2 hover:bg-blue-700 p-2 rounded"
@@ -59,7 +57,6 @@ const AdminNavbar: React.FC = () => {
         <span>Logout</span>
       </Link>
 
-      {/* Daily Revenue Display */}
       <div className="text-lg">
         <span className="font-semibold">Daily Revenue:</span> $1234.56
       </div>

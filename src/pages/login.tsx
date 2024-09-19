@@ -1,99 +1,73 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../Routes/apiService";
-import { toast } from "react-toastify";
-import { AxiosError } from "axios";
+import {jwtDecode} from "jwt-decode"; // Importa correctamente jwt-decode
+import { loginUser } from "../Routes/apiService"; // Asegúrate de tener loginUser configurado correctamente
+import { useAuth } from "../context/AuthContext"; // Asegúrate de importar useAuth desde el contexto
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { setIsAdmin } = useAuth(); // Llama a setIsAdmin desde el contexto
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     try {
-      // Llamada a la API para iniciar sesión
       const response = await loginUser({ email, password });
+      const token = response.token;
 
-      // Verificar que `response` tenga `token`, `id` y `role`
-      if (response.token && response.id && response.role) {
-        // Guardar token y datos del usuario en localStorage
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("userId", response.id.toString());
-        localStorage.setItem("role", response.role); // Guardar el rol en localStorage
+      // Guardar el token en localStorage
+      localStorage.setItem("authToken", token);
 
-        // Mostrar mensaje de éxito
-        toast.success("Login successful!");
+      // Decodificar el token para extraer información del usuario
+      const decodedToken = jwtDecode<{ role: string }>(token);
 
-        // Redirigir según el rol del usuario
-        if (response.role === "admin") {
-          navigate("admin/adminHome"); 
-        } else {
-          navigate("/}");
-        }
+      console.log("Usuario decodificado:", decodedToken);
+
+      // Actualizar el contexto
+      setIsAdmin(decodedToken.role === "admin");
+
+      // Redirigir según el rol
+      if (decodedToken.role === "admin") {
+        navigate("/adminHome");
       } else {
-        // Mostrar mensaje de error si no se recibe token, id o role
-        toast.error("Invalid response from server. Please try again.");
+        navigate("/");
       }
-    } catch (error) {
-      // Manejo de errores y notificación al usuario
-      if (error instanceof AxiosError) {
-        toast.error(
-          error.response?.data?.message ||
-            "Login failed! Please check your credentials and try again."
-        );
-      } else if (error instanceof Error) {
-        toast.error("An unexpected error occurred: " + error.message);
-      } else {
-        toast.error("An unknown error occurred. Please try again later.");
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message || "Login failed");
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </div>
+      <div className="w-full max-w-sm bg-white p-8 rounded-lg shadow-md">
+        <h1 className="text-2xl font-semibold mb-6 text-center text-indigo-600">
+          Login
+        </h1>
+        <div className="space-y-4">
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
           <button
-            type="submit"
-            className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={handleLogin}
+            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition"
           >
             Login
           </button>
-        </form>
+          {error && <p className="text-red-600 text-center mt-4">{error}</p>}
+        </div>
       </div>
     </div>
   );

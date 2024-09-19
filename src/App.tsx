@@ -1,47 +1,81 @@
-// src/App.tsx
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import Home from "./pages/home";
-import About from "./components/About";
-import CartPage from "./pages/CartPage";
-import Login from "./pages/login";
-import Register from "./pages/Register";
-import Profile from "./pages/Profile";
-import AdminDashboard from "./pages/admin/adminHome";
-import { CartProvider } from "./components/cartContext";
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "./index.css";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Cart from "./components/Cart";
+import HomePage from "./pages/home";
+import LoginPage from "./pages/login";
+import RegisterPage from "./pages/Register";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminNavbar from "./components/navbar/AdminNavbar";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-function App() {
+// Componente para rutas privadas (solo usuarios autenticados)
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const token = localStorage.getItem("authToken");
+
+  if (!token) {
+    // Si no hay token, redirigir al login
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Componente para rutas de administrador (solo administradores)
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAdmin } = useAuth();
+
+  if (!isAdmin) {
+    // Si no es administrador, redirigir al home
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const App: React.FC = () => {
   return (
     <AuthProvider>
-      <CartProvider>
+      <Router>
         <Header />
-        <main className="flex-1">
+
+        <div className="min-h-screen bg-gray-100">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin/dashboard" element={<AdminRoute />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/cart"
+              element={
+                <PrivateRoute>
+                  <Cart />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/adminHome"
+              element={
+                <AdminRoute>
+                  <AdminNavbar />
+                  <AdminDashboard />
+                </AdminRoute>
+              }
+            />
           </Routes>
-        </main>
-        <ToastContainer />
-      </CartProvider>
+        </div>
+
+        <Footer />
+      </Router>
     </AuthProvider>
   );
-}
-
-// Componente para proteger la ruta de administración
-const AdminRoute: React.FC = () => {
-  const { isAdmin } = useAuth();
-  return isAdmin ? <AdminDashboard /> : <Navigate to="/" />;
 };
 
 export default App;

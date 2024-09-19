@@ -1,3 +1,4 @@
+// Navbar.tsx
 import React, { useState } from "react";
 import { useCart } from "../cartContext";
 import { Link } from "react-router-dom";
@@ -7,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { cartItems } = useCart();
-
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const toggleCart = () => setIsOpen(!isOpen);
@@ -19,7 +19,6 @@ const Navbar: React.FC = () => {
           MyShop
         </Link>
 
-        {/* Cart button with notification */}
         <div className="relative">
           <button
             onClick={toggleCart}
@@ -32,8 +31,6 @@ const Navbar: React.FC = () => {
                 isOpen ? "rotate-180" : ""
               }`}
             />
-
-            {/* Cart notification badge */}
             {totalItems > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                 {totalItems}
@@ -41,7 +38,6 @@ const Navbar: React.FC = () => {
             )}
           </button>
 
-          {/* Cart dropdown */}
           <AnimatePresence>
             {isOpen && (
               <motion.div
@@ -78,20 +74,31 @@ const Navbar: React.FC = () => {
                         </div>
                       </li>
                     ))}
-                    <p className="text-lg font-bold mt-4">
+                    <p className="text-right text-lg font-bold text-gray-800">
                       Total: $
-                      {cartItems.reduce(
-                        (acc, item) => acc + item.price * item.quantity,
-                        0
-                      )}
+                      {cartItems
+                        .reduce(
+                          (total, item) => total + item.price * item.quantity,
+                          0
+                        )
+                        .toFixed(2)}
                     </p>
-                    <Link to="/cart">
-                      <button className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition duration-300">
-                        Go to Cart
-                      </button>
-                    </Link>
                   </ul>
                 )}
+                <div className="flex justify-between mt-6">
+                  <Link
+                    to="/cart"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-300"
+                  >
+                    View Cart
+                  </Link>
+                  <button
+                    onClick={toggleCart}
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition duration-300"
+                  >
+                    Close
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

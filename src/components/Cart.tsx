@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// Cart.tsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useCart } from "../components/cartContext";
@@ -5,36 +7,27 @@ import { ToastContainer, toast } from "react-toastify";
 import Confetti from "react-confetti";
 import { ClipLoader } from "react-spinners";
 import "react-toastify/dist/ReactToastify.css";
-import "tailwindcss/tailwind.css";
 
 interface UserData {
   id: number;
   email: string;
-  // Agrega otros campos según sea necesario
 }
 
 const getUserData = (): UserData | null => {
   try {
     const userDataString = localStorage.getItem("user");
-    if (!userDataString) {
-      throw new Error("Datos de usuario no encontrados en localStorage");
-    }
+    if (!userDataString) throw new Error("Datos de usuario no encontrados");
 
     const parsedData = JSON.parse(userDataString);
-    if (!parsedData.user) {
-      throw new Error("Datos de usuario no encontrados en el objeto parseado");
-    }
-
     const userData = parsedData.user as UserData;
-    if (!userData.id || !userData.email) {
-      throw new Error("Datos de usuario faltantes");
-    }
+
+    if (!userData.id || !userData.email)
+      throw new Error("Datos de usuario incompletos");
 
     return userData;
   } catch (error) {
-    console.error("Error al obtener los datos del usuario:", error);
     toast.error(
-      "Los datos de usuario no son válidos o están incompletos. Por favor, inicia sesión nuevamente."
+      "Error al obtener los datos de usuario. Por favor, inicia sesión nuevamente."
     );
     return null;
   }
@@ -48,25 +41,20 @@ const Cart = () => {
 
   useEffect(() => {
     const data = getUserData();
-    if (data) {
-      setUserData(data);
-    }
+    if (data) setUserData(data);
   }, []);
 
   const handleConfirmPurchase = async () => {
     if (!userData) {
-      console.error("Datos de usuario faltantes");
       toast.error("No se pueden confirmar la compra sin datos de usuario.");
       return;
     }
 
-    setLoading(true); // Muestra el spinner de carga
+    setLoading(true);
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Token de autenticación no encontrado");
-      }
+      if (!token) throw new Error("Token de autenticación no encontrado");
 
       const payload = {
         userId: userData.id,
@@ -82,45 +70,26 @@ const Cart = () => {
         email: userData.email,
       };
 
-      const response = await axios.post(
-        "http://localhost:3000/sales/register-sale",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.post("http://localhost:3000/sales/register-sale", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      console.log("Compra confirmada para el usuario:", userData);
-      console.log("Respuesta del servidor:", response.data);
       toast.success("Compra confirmada exitosamente!");
       setConfetti(true);
 
-      // Detener el spinner y el confeti después de 5 segundos
       setTimeout(() => {
         setConfetti(false);
         setLoading(false);
       }, 5000);
     } catch (error) {
-      setLoading(false); // Oculta el spinner de carga en caso de error
-      if (axios.isAxiosError(error)) {
-        console.error(
-          "Error al confirmar la compra:",
-          error.response?.data || error.message
-        );
-        toast.error(
-          `Error al confirmar la compra: ${
-            error.response?.data || error.message
-          }`
-        );
-      } else if (error instanceof Error) {
-        console.error("Error al confirmar la compra:", error.message);
-        toast.error(`Error al confirmar la compra: ${error.message}`);
-      } else {
-        console.error("Error desconocido al confirmar la compra:", error);
-        toast.error("Error desconocido al confirmar la compra.");
-      }
+      setLoading(false);
+
+      // Verificar si el error es una instancia de Error y tiene mensaje
+      const errorMessage =
+        error instanceof Error ? error.message : "Error desconocido";
+      toast.error(`Error al confirmar la compra: ${errorMessage}`);
     }
   };
 
@@ -130,19 +99,25 @@ const Cart = () => {
         Carrito de Compras
       </h1>
       <ul className="space-y-4 mb-6">
-        {cartItems.map((item) => (
-          <li
-            key={item.id}
-            className="flex justify-between items-center py-3 px-4 border border-gray-300 rounded-md shadow-sm"
-          >
-            <span className="font-semibold text-lg text-gray-700">
-              {item.name}
-            </span>
-            <span className="text-gray-500">
-              ${item.price.toFixed(2)} x {item.quantity}
-            </span>
+        {cartItems.length === 0 ? (
+          <li className="text-center text-gray-500">
+            Tu carrito está vacío 🛒
           </li>
-        ))}
+        ) : (
+          cartItems.map((item) => (
+            <li
+              key={item.id}
+              className="flex justify-between items-center py-3 px-4 border border-gray-300 rounded-md shadow-sm"
+            >
+              <span className="font-semibold text-lg text-gray-700">
+                {item.name}
+              </span>
+              <span className="text-gray-500">
+                ${item.price.toFixed(2)} x {item.quantity}
+              </span>
+            </li>
+          ))
+        )}
       </ul>
       <div className="flex justify-between items-center mb-6">
         <span className="text-2xl font-bold text-gray-800">
@@ -165,9 +140,7 @@ const Cart = () => {
       </div>
       <ToastContainer />
       {confetti && (
-        <div className="absolute inset-0 z-10">
-          <Confetti width={window.innerWidth} height={window.innerHeight} />
-        </div>
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
       )}
     </div>
   );

@@ -1,4 +1,10 @@
 import React, { createContext, useState, useContext, ReactNode } from "react";
+import {jwtDecode} from "jwt-decode"; // Importación correcta de jwtDecode
+
+// Define la interfaz del token decodificado
+interface DecodedToken {
+  role: string; // Cambia a role en lugar de isAdmin
+}
 
 interface AuthContextType {
   isAdmin: boolean;
@@ -13,12 +19,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   React.useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken"); // Usamos "authToken"
     if (token) {
-      // Decodifica el token y verifica el rol
-      // (Utiliza una biblioteca como jwt-decode si es necesario)
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      setIsAdmin(decodedToken.role === "admin"); // Asegúrate de que el rol sea verificado correctamente
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token); // Decodificamos el token
+        setIsAdmin(decodedToken.role === "admin"); // Usamos role del token
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setIsAdmin(false); // Si hay error, no es admin
+      }
     }
   }, []);
 
@@ -29,7 +38,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
