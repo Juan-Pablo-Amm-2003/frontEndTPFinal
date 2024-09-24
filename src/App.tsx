@@ -13,6 +13,7 @@ import LoginPage from "./pages/login";
 import RegisterPage from "./pages/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNavbar from "./components/navbar/AdminNavbar";
+import ProfilePage from "./pages/Profile";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Componente para rutas privadas (solo usuarios autenticados)
@@ -22,7 +23,6 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({
   const token = localStorage.getItem("authToken");
 
   if (!token) {
-    // Si no hay token, redirigir al login
     return <Navigate to="/login" replace />;
   }
 
@@ -61,6 +61,14 @@ const App: React.FC = () => {
               }
             />
             <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <ProfilePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/adminHome"
               element={
                 <AdminRoute>
@@ -68,6 +76,10 @@ const App: React.FC = () => {
                   <AdminDashboard />
                 </AdminRoute>
               }
+            />
+            <Route
+              path="*"
+              element={<Navigate to="/" />} // Redirigir cualquier ruta desconocida al HomePage
             />
           </Routes>
         </div>

@@ -1,8 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import axios, { AxiosResponse } from "axios";
 import { API_ROUTES } from "../Routes/apiRoutes";
 import { LoginResponse, RegisterResponse } from "../interface/types";
 
-// Instancia de Axios
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  phone?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+}
+
+// Axios instance
 const api = axios.create({
   baseURL: "http://localhost:3000",
   headers: {
@@ -10,65 +24,55 @@ const api = axios.create({
   },
 });
 
-// Set token in the headers for authenticated requests
-const setAuthToken = (token: string | null) => {
-  if (token) {
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  } else {
-    delete api.defaults.headers.common["Authorization"];
-  }
-};
-
-// Manejador de errores
+// Error handler
 const handleError = (error: unknown) => {
-  console.error("Error in API call:", error);
+  console.error("API error:", error);
   return { message: "An error occurred, please try again later." };
 };
 
-// Servicios de Productos
+// Products Service
 export const fetchProducts = async () => {
   try {
-    const response = await api.get("/products");
-    return response.data.products;
+    const { data } = await api.get(API_ROUTES.PRODUCTS.GET_ALL);
+    console.log("Fetched products:", data.products);
+    return data.products;
   } catch (error) {
     console.error("Error fetching products:", error);
     return [];
   }
 };
 
-// Servicios de Ventas
+// Sales Service
 export const registerSale = async (saleData: object) => {
   try {
-    const response = await api.post(API_ROUTES.SALES.REGISTER, saleData);
-    return response.data;
+    const { data } = await api.post(API_ROUTES.SALES.REGISTER, saleData);
+    return data;
   } catch (error) {
-    const errorDetails = handleError(error);
-    throw new Error(errorDetails.message);
+    throw new Error(handleError(error).message);
   }
 };
 
-// Servicios de Usuarios
 
+
+// Users Service
 export const loginUser = async (credentials: {
   email: string;
   password: string;
-}) => {
+}): Promise<LoginResponse> => {
   try {
     const response: AxiosResponse<LoginResponse> = await api.post(
       API_ROUTES.USERS.LOGIN,
       credentials
     );
-    const { token } = response.data;
-    localStorage.setItem("authToken", token); // Guardar token
-    setAuthToken(token); // Configurar token para futuras peticiones
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      console.error("Axios error during login:", error.response.data);
-      throw new Error(error.response.data.message || "Login failed");
+    if (axios.isAxiosError(error)) {
+      const message = error.response?.data.message || error.message;
+      console.error("Login error:", message);
+      throw new Error(message);
     } else {
-      console.error("Error during login:", error);
-      throw new Error("Login failed");
+      console.error("Unexpected error:", error);
+      throw new Error("An unknown error occurred.");
     }
   }
 };
@@ -79,32 +83,56 @@ export const registerUser = async (credentials: {
   username: string;
 }): Promise<RegisterResponse> => {
   try {
-    const response: AxiosResponse<RegisterResponse> = await api.post(
-      API_ROUTES.USERS.REGISTER,
-      credentials
-    );
-    return response.data;
+    const { data } = await api.post(API_ROUTES.USERS.REGISTER, credentials);
+    return data;
   } catch (error) {
-    const errorDetails = handleError(error);
-    throw new Error(errorDetails.message);
+    throw new Error(handleError(error).message);
   }
 };
 
-export const fetchUserById = async (id: string) => {
+export const fetchUserById = async (
+  userId: string,
+  token: string
+): Promise<User | null> => {
   try {
-    const response = await api.get(API_ROUTES.USERS.GET_BY_ID(id));
-    return response.data;
+    const response = await fetch(`/api/users/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Enviar token con la solicitud
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error fetching user data.");
+    }
+
+    return response.json();
   } catch (error) {
-    console.error("Error fetching user by ID:", error);
-    throw new Error("Failed to fetch user data. Please try again later.");
+    console.error("Fetch user by ID error:", error);
+    return null;
   }
 };
 
 export const fetchUsers = async () => {
   try {
-    const response = await api.get(API_ROUTES.USERS.GET_ALL);
-    return response.data;
+    const { data } = await api.get(API_ROUTES.USERS.GET_ALL);
+    return data;
   } catch (error) {
     return handleError(error);
   }
+};
+
+export const updateUser = async (
+  userId: string,
+  updatedUser: User,
+  token: string
+) => {
+  const response = await fetch(`/api/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // Enviar token con la solicitud
+    },
+    body: JSON.stringify(updatedUser),
+  });
+  return response.json();
 };

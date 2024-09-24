@@ -1,35 +1,61 @@
-// cartContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { CartItem } from "../interface/types"; // Define bien la interfaz CartItem
+import React, { createContext, useReducer, useContext, ReactNode } from "react";
+import { CartItem } from "../interface/types";
 
-interface CartContextType {
+interface CartState {
   cartItems: CartItem[];
-  addToCart: (item: CartItem) => void;
-  // Otras funciones como eliminar del carrito pueden agregarse aquí
 }
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+// Ensure id is of type number
+type CartAction =
+  | { type: "ADD_ITEM"; item: CartItem }
+  | { type: "REMOVE_ITEM"; id: number } // Change id type to number
+  | { type: "CLEAR_CART" };
 
-export const useCart = (): CartContextType => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart debe ser usado dentro de CartProvider");
+const cartReducer = (state: CartState, action: CartAction): CartState => {
+  switch (action.type) {
+    case "ADD_ITEM":
+      return { ...state, cartItems: [...state.cartItems, action.item] };
+    case "REMOVE_ITEM":
+      return {
+        ...state,
+        cartItems: state.cartItems.filter((item) => item.id !== action.id),
+      };
+    case "CLEAR_CART":
+      return { cartItems: [] };
+    default:
+      return state;
   }
-  return context;
 };
+
+const CartContext = createContext<
+  | {
+      state: CartState;
+      dispatch: React.Dispatch<CartAction>;
+      addToCart: (item: CartItem) => void;
+    }
+  | undefined
+>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [state, dispatch] = useReducer(cartReducer, { cartItems: [] });
 
   const addToCart = (item: CartItem) => {
-    setCartItems((prevItems) => [...prevItems, item]);
+    dispatch({ type: "ADD_ITEM", item });
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart }}>
+    <CartContext.Provider value={{ state, dispatch, addToCart }}>
       {children}
     </CartContext.Provider>
   );
+};
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
 };

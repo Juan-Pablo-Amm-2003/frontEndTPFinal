@@ -1,6 +1,8 @@
 // src/pages/AdminDashboard.tsx
 import React from "react";
 import { useAuth } from "../../context/AuthContext";
+import ProductForm from "../../pages/admin/ProductForm";
+import SalesPage from "../../pages/admin/salesPages";
 
 const AdminDashboard: React.FC = () => {
   const { isAdmin } = useAuth();
@@ -24,6 +26,18 @@ const AdminDashboard: React.FC = () => {
         <h2>Estadísticas del Sistema</h2>
         <p>Visualiza estadísticas, uso del sistema, etc.</p>
         {/* Ejemplo de gráfica o tabla con estadísticas */}
+      </section>
+
+      {/* Sección para crear productos */}
+      <section>
+        <h2>Crear Producto</h2>
+        <ProductForm />
+      </section>
+
+      {/* Sección para mostrar la lista de ventas */}
+      <section>
+        <h2>Lista de Ventas</h2>
+        <SalesPage /> {/* Agregamos la página de ventas */}
       </section>
     </div>
   );

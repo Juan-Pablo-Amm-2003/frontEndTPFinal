@@ -7,7 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { cartItems } = useCart();
+  const { state } = useCart(); // Get the state
+  const cartItems = state.cartItems || []; // Ensure cartItems is defined
+
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const toggleCart = () => setIsOpen(!isOpen);
@@ -18,7 +20,6 @@ const Navbar: React.FC = () => {
         <Link to="/" className="text-xl font-semibold tracking-wide">
           MyShop
         </Link>
-
         <div className="relative">
           <button
             onClick={toggleCart}

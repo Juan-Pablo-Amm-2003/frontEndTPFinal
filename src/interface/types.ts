@@ -3,30 +3,22 @@
 export interface Product {
   id: number;
   name: string;
-  price: number; // Ensure this is consistent
-  imagePath?: string; // Adjust to string | null if needed
   description: string;
+  price: string; // Si el precio viene como string desde la API
+  imagePath: string;
+  category_id: number;
   stock: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  description: string; // Agregamos la propiedad description
-  stock: number;
-}
 
-// src/types.ts
+
 
 // Definición de la respuesta de login
 export interface LoginResponse {
   token: string;
-  id: string;
-  role: string;
-  // Agrega otros campos según la respuesta de tu API
+  userId: number;
 }
 
 // Definición de la respuesta de registro
@@ -36,4 +28,15 @@ export interface RegisterResponse {
   username: string;
   email: string;
   // Agrega otros campos según la respuesta de tu API
+}
+
+
+
+// interface/types.ts
+export interface CartItem {
+  image: string | undefined;
+  id: number; 
+  name: string;
+  price: number;
+  quantity: number;
 }

@@ -6,14 +6,13 @@ import {
   FaProductHunt,
   FaDollarSign,
   FaCog,
-  FaSignOutAlt,
 } from "react-icons/fa";
 
 const AdminNavbar: React.FC = () => {
   return (
     <nav className="bg-blue-800 text-white p-4 flex items-center justify-between">
       <div className="flex items-center space-x-4">
-        <Link to="/admin" className="text-xl font-bold">
+        <Link to="/admin" className="text-xl font-bold hover:text-gray-300">
           Admin Dashboard
         </Link>
 
@@ -33,7 +32,7 @@ const AdminNavbar: React.FC = () => {
             <span>Products</span>
           </Link>
           <Link
-            to="/admin/sales"
+            to="pages/admin/ProductForm"
             className="flex items-center space-x-2 hover:bg-blue-700 p-2 rounded"
           >
             <FaDollarSign />
@@ -48,14 +47,6 @@ const AdminNavbar: React.FC = () => {
           </Link>
         </div>
       </div>
-
-      <Link
-        to="/logout"
-        className="flex items-center space-x-2 hover:bg-blue-700 p-2 rounded"
-      >
-        <FaSignOutAlt />
-        <span>Logout</span>
-      </Link>
 
       <div className="text-lg">
         <span className="font-semibold">Daily Revenue:</span> $1234.56

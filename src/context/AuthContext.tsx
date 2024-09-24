@@ -1,14 +1,15 @@
 import React, { createContext, useState, useContext, ReactNode } from "react";
-import {jwtDecode} from "jwt-decode"; // Importación correcta de jwtDecode
+import { jwtDecode } from "jwt-decode";
 
-// Define la interfaz del token decodificado
 interface DecodedToken {
-  role: string; // Cambia a role en lugar de isAdmin
+  role: string;
+  exp: number; // Add exp field for expiration
 }
 
 interface AuthContextType {
   isAdmin: boolean;
   setIsAdmin: (isAdmin: boolean) => void;
+  logout: () => void; // Provide logout method
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,25 +20,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   React.useEffect(() => {
-    const token = localStorage.getItem("authToken"); // Usamos "authToken"
+    const token = localStorage.getItem("authToken");
     if (token) {
       try {
-        const decodedToken = jwtDecode<DecodedToken>(token); // Decodificamos el token
-        setIsAdmin(decodedToken.role === "admin"); // Usamos role del token
+        const decodedToken = jwtDecode<DecodedToken>(token);
+
+        // Check if token has expired
+        if (decodedToken.exp * 1000 < Date.now()) {
+          console.warn("Token has expired");
+          localStorage.removeItem("authToken");
+          setIsAdmin(false);
+          return;
+        }
+
+        setIsAdmin(decodedToken.role === "admin");
       } catch (error) {
         console.error("Error decoding token:", error);
-        setIsAdmin(false); // Si hay error, no es admin
+        setIsAdmin(false);
       }
     }
   }, []);
 
+  const logout = () => {
+    localStorage.removeItem("authToken");
+    setIsAdmin(false);
+  };
+
   return (
-    <AuthContext.Provider value={{ isAdmin, setIsAdmin }}>
+    <AuthContext.Provider value={{ isAdmin, setIsAdmin, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
