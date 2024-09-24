@@ -2,8 +2,10 @@
 import axios, { AxiosResponse } from "axios";
 import { API_ROUTES } from "../Routes/apiRoutes";
 import { LoginResponse, RegisterResponse } from "../interface/types";
+import { SetStateAction } from "react";
 
 interface User {
+  user: SetStateAction<User | null>;
   id: number;
   username: string;
   email: string;
@@ -90,27 +92,27 @@ export const registerUser = async (credentials: {
   }
 };
 
+
 export const fetchUserById = async (
   userId: string,
   token: string
 ): Promise<User | null> => {
   try {
-    const response = await fetch(`/api/users/${userId}`, {
+    const response = await api.get(API_ROUTES.USERS.GET_BY_ID(userId), {
       headers: {
-        Authorization: `Bearer ${token}`, // Enviar token con la solicitud
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    if (!response.ok) {
-      throw new Error("Error fetching user data.");
-    }
-
-    return response.json();
+    console.log(response.data); // Muestra la respuesta en consola antes de devolverla
+    return response.data;
   } catch (error) {
     console.error("Fetch user by ID error:", error);
     return null;
   }
 };
+
+
 
 export const fetchUsers = async () => {
   try {

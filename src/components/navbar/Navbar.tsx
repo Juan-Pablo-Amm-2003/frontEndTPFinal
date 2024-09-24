@@ -7,23 +7,27 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { state } = useCart(); // Get the state
-  const cartItems = state.cartItems || []; // Ensure cartItems is defined
-
+  const { state } = useCart();
+  const cartItems = state.cartItems || [];
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const toggleCart = () => setIsOpen(!isOpen);
+  const toggleCart = () => setIsOpen((prev) => !prev);
 
   return (
-    <nav className="relative bg-gray-900 text-white px-4 py-3 shadow-md">
+    <nav className="relative bg-gray-900 text-white px-4 py-4 shadow-md">
       <div className="flex justify-between items-center max-w-7xl mx-auto">
-        <Link to="/" className="text-xl font-semibold tracking-wide">
+        <Link
+          to="/"
+          className="text-2xl font-bold tracking-wide hover:text-blue-400 transition-colors"
+        >
           MyShop
         </Link>
         <div className="relative">
           <button
             onClick={toggleCart}
-            className="relative bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full transition-all duration-300 flex items-center"
+            aria-haspopup="true"
+            aria-expanded={isOpen}
+            className="flex items-center bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-full transition-all duration-300 focus:outline-none"
           >
             <FiShoppingCart className="mr-2 text-lg" />
             <span>Cart</span>
@@ -46,7 +50,7 @@ const Navbar: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="absolute top-full right-0 mt-2 w-80 bg-white text-black p-4 shadow-lg rounded-lg"
+                className="absolute top-full right-0 mt-2 w-80 bg-white text-black p-4 shadow-lg rounded-lg z-50"
               >
                 <h2 className="text-xl font-bold mb-4">Your Cart</h2>
                 {cartItems.length === 0 ? (

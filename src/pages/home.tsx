@@ -12,9 +12,11 @@ interface User {
 
 const HomePage: React.FC = () => {
   const { isAdmin } = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
+  const username = localStorage.getItem("username");
 
   const validateToken = (token: string) => {
     const decodedToken = jwtDecode<{ exp: number }>(token);
@@ -38,13 +40,15 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-600 text-white p-4 text-center">
-        <h1 className="text-4xl font-bold">Bienvenido a la Tienda</h1>
-        {user && <h2 className="text-2xl mt-2">Hola, {user.username}!</h2>}
+      <header className="bg-blue-700 text-white p-6 text-center shadow-lg">
+        <h1 className="text-5xl font-extrabold">Bienvenido a la Tienda</h1>
+        {username && (
+          <h2 className="text-3xl mt-2 italic">Hola, {username}!</h2>
+        )}
       </header>
-      <main className="container mx-auto py-8">
+      <main className="container mx-auto py-10 px-4">
         {!token && (
-          <p className="text-center text-red-500 text-lg mb-6">
+          <p className="text-center text-red-600 text-lg mb-8">
             Inicia sesión para acceder a todas las funciones.
           </p>
         )}
@@ -52,16 +56,14 @@ const HomePage: React.FC = () => {
           <ProductList />
         </section>
         {isAdmin && (
-          <div className="text-center">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+          <div className="text-center mt-8">
+            <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded transition-colors">
               Agregar Producto (solo admin)
             </button>
           </div>
         )}
       </main>
-      <footer className="bg-gray-800 text-white py-4 text-center">
-        <p>&copy; 2024 Mi Tienda - Todos los derechos reservados</p>
-      </footer>
+
     </div>
   );
 };

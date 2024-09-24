@@ -1,11 +1,13 @@
 import React from "react";
-import Cart from "../components/Cart";
+import Carrito from "../components/Cart";
 
 const CartPage: React.FC = () => {
   return (
-    <div className="container mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-4">Carrito</h2>
-      <Cart />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold mb-4 text-center">Carrito</h2>
+        <Carrito />
+      </div>
     </div>
   );
 };

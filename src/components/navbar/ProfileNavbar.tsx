@@ -5,8 +5,10 @@ import { FiUser } from "react-icons/fi";
 
 const ProfileNavbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [user, setUser] = useState<any>(null); // Almacenar datos del usuario
+  const [user, setUser] = useState<{
+    username: string;
+    isAdmin: boolean;
+  } | null>(null);
   const navigate = useNavigate();
 
   const { opacity, transform } = useSpring({
@@ -18,7 +20,10 @@ const ProfileNavbar: React.FC = () => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsedStoredUser = JSON.parse(storedUser);
-      setUser(parsedStoredUser.user);
+      setUser({
+        username: parsedStoredUser.username,
+        isAdmin: parsedStoredUser.isAdmin,
+      });
     }
   }, []);
 
@@ -40,11 +45,16 @@ const ProfileNavbar: React.FC = () => {
       {isOpen && (
         <animated.div style={{ opacity, transform }} className="...">
           <div className="text-sm text-gray-700 mb-2">
-            Role: {user?.role || "N/A"}
+            Role: {user?.isAdmin ? "Admin" : "User"}
           </div>
           <button onClick={goToProfile} className="...">
             Go to Profile
           </button>
+          {user?.isAdmin && (
+            <button onClick={() => navigate("/admin")} className="...">
+              Admin Panel
+            </button>
+          )}
         </animated.div>
       )}
     </div>

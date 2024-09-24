@@ -13,7 +13,7 @@ import LoginPage from "./pages/login";
 import RegisterPage from "./pages/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNavbar from "./components/navbar/AdminNavbar";
-import ProfilePage from "./pages/Profile";
+import Profile from './pages/Profile'; 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Componente para rutas privadas (solo usuarios autenticados)
@@ -64,7 +64,7 @@ const App: React.FC = () => {
               path="/profile"
               element={
                 <PrivateRoute>
-                  <ProfilePage />
+                  <Profile />
                 </PrivateRoute>
               }
             />
