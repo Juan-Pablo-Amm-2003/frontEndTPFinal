@@ -1,10 +1,44 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import axios, { AxiosError } from "axios";
-import { API_ROUTES } from "../../Routes/apiRoutes";
-import { toast, ToastContainer } from "react-toastify"; // Importa toast y ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Importa el CSS para estilos
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const ProductForm: React.FC = () => {
+// Configuración centralizada de Axios
+const api = axios.create({
+  baseURL: "http://localhost:3000",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Función para crear el producto
+const createProduct = async (formData: FormData) => {
+  try {
+    const response = await api.post("/products/create", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log("Product created successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Axios error during product creation:",
+        error.response?.data || error.message
+      );
+      throw new Error(
+        error.response?.data?.message || "Error al crear el producto"
+      );
+    } else {
+      console.error("Unexpected error during product creation:", error);
+      throw new Error("Error inesperado");
+    }
+  }
+};
+
+
+const ProductForm: React.FC<{ productId?: string }> = ({ productId }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -20,62 +54,38 @@ const ProductForm: React.FC = () => {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
-    formData.append("price", price);
+    formData.append("price", parseFloat(price).toString());
     formData.append("category_id", category);
-    formData.append("stock", stock);
+    formData.append("stock", parseInt(stock).toString());
     if (image) {
       formData.append("image", image);
     }
 
     try {
-      const response = await axios.post(API_ROUTES.PRODUCTS.CREATE, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      console.log("Response Data:", response.data);
-      toast.success("¡Producto creado con éxito!", {
-        position: "top-right", // Cambia aquí para la posición
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-      });
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        const errorMessage = axiosError.response?.data || axiosError.message;
-        console.error("Error creating product:", errorMessage);
-        toast.error(`Error al crear el producto: ${errorMessage}`, {
-          position: "top-right", // Cambia aquí para la posición
+      const response = await createProduct(formData);
+      if (response) {
+        toast.success("¡Producto creado con éxito!", {
+          position: "top-right",
           autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
         });
-      } else {
-        console.error("Unexpected error:", error);
-        toast.error(
-          "Error al crear el producto debido a un error inesperado.",
-          {
-            position: "top-right", // Cambia aquí para la posición
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-          }
-        );
       }
+    } catch (error) {
+      console.error("Error al crear el producto:", error);
+      toast.error("Error al crear el producto", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
   return (
     <div className="max-w-lg mx-auto p-4 bg-white shadow-md rounded-lg border border-gray-200">
-      <h1 className="text-2xl font-bold mb-4">Crear Producto</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {productId ? "Editar Producto" : "Crear Producto"}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
@@ -93,6 +103,7 @@ const ProductForm: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
+
         <div>
           <label
             htmlFor="description"
@@ -109,6 +120,7 @@ const ProductForm: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
+
         <div>
           <label
             htmlFor="price"
@@ -125,6 +137,7 @@ const ProductForm: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
+
         <div>
           <label
             htmlFor="category"
@@ -141,6 +154,7 @@ const ProductForm: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
+
         <div>
           <label
             htmlFor="stock"
@@ -157,6 +171,7 @@ const ProductForm: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
         </div>
+
         <div>
           <label
             htmlFor="image"
@@ -172,15 +187,16 @@ const ProductForm: React.FC = () => {
             className="mt-1 block w-full text-sm text-gray-500 border border-gray-300 rounded-md"
           />
         </div>
+
         <button
           type="submit"
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md shadow-sm hover:bg-indigo-700"
         >
-          Crear Producto
+          {productId ? "Actualizar Producto" : "Crear Producto"}
         </button>
+
       </form>
-      <ToastContainer />{" "}
-      {/* Asegúrate de agregar el contenedor de notificaciones */}
+      <ToastContainer />
     </div>
   );
 };

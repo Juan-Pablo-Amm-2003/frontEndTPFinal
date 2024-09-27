@@ -1,3 +1,4 @@
+// cartContext.tsx
 import React, { createContext, useReducer, useContext, ReactNode } from "react";
 import { CartItem } from "../interface/types";
 
@@ -5,11 +6,14 @@ interface CartState {
   cartItems: CartItem[];
 }
 
-// Ensure id is of type number
 type CartAction =
   | { type: "ADD_ITEM"; item: CartItem }
-  | { type: "REMOVE_ITEM"; id: number } // Change id type to number
+  | { type: "REMOVE_ITEM"; id: number }
   | { type: "CLEAR_CART" };
+
+const initialState: CartState = {
+  cartItems: [],
+};
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
@@ -27,26 +31,35 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   }
 };
 
-const CartContext = createContext<
-  | {
-      state: CartState;
-      dispatch: React.Dispatch<CartAction>;
-      addToCart: (item: CartItem) => void;
-    }
-  | undefined
->(undefined);
+const CartContext = createContext<{
+  state: CartState;
+  dispatch: React.Dispatch<CartAction>;
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (id: number) => void; // Agregamos la función aquí
+}>({
+  state: initialState,
+  dispatch: () => null,
+  addToCart: () => {},
+  removeFromCart: () => {}, // Implementación vacía por defecto
+});
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [state, dispatch] = useReducer(cartReducer, { cartItems: [] });
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
   const addToCart = (item: CartItem) => {
     dispatch({ type: "ADD_ITEM", item });
   };
 
+  const removeFromCart = (id: number) => {
+    dispatch({ type: "REMOVE_ITEM", id });
+  };
+
   return (
-    <CartContext.Provider value={{ state, dispatch, addToCart }}>
+    <CartContext.Provider
+      value={{ state, dispatch, addToCart, removeFromCart }}
+    >
       {children}
     </CartContext.Provider>
   );

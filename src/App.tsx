@@ -13,7 +13,9 @@ import LoginPage from "./pages/login";
 import RegisterPage from "./pages/Register";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNavbar from "./components/navbar/AdminNavbar";
-import Profile from './pages/Profile'; 
+import Profile from "./pages/Profile";
+import ProductList from "./pages/products/ProductList"; 
+import ProductDetails from "./pages/products/ProductDetails"; 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Componente para rutas privadas (solo usuarios autenticados)
@@ -68,6 +70,10 @@ const App: React.FC = () => {
                 </PrivateRoute>
               }
             />
+            <Route path="/products" element={<ProductList />} />{" "}
+            {/* Ruta para ProductList */}
+            <Route path="/product/:id" element={<ProductDetails />} />{" "}
+            {/* Ruta para ProductDetails */}
             <Route
               path="/adminHome"
               element={
@@ -77,10 +83,8 @@ const App: React.FC = () => {
                 </AdminRoute>
               }
             />
-            <Route
-              path="*"
-              element={<Navigate to="/" />} // Redirigir cualquier ruta desconocida al HomePage
-            />
+            <Route path="*" element={<Navigate to="/" />} />{" "}
+            {/* Redirigir cualquier ruta desconocida al HomePage */}
           </Routes>
         </div>
 

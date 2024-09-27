@@ -99,8 +99,7 @@ const Carrito: React.FC = () => {
         email: correo,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const response = await registerSale(payload);
+      await registerSale(payload);
       toast.success("Compra confirmada exitosamente!");
       setConfetti(true);
       dispatch({ type: "CLEAR_CART" });
@@ -110,13 +109,16 @@ const Carrito: React.FC = () => {
       }, 5000);
     } catch (error) {
       setCargando(false);
-      if (error instanceof Error) {
-        toast.error("Error al confirmar la compra: " + error.message);
-      } else {
-        toast.error("Error al confirmar la compra.");
-      }
-      console.error("Error:", error);
+      toast.error(
+        "Error al confirmar la compra: " +
+          (error instanceof Error ? error.message : "Error desconocido.")
+      );
     }
+  };
+
+  const eliminarDelCarrito = (id: number) => {
+    dispatch({ type: "REMOVE_ITEM", id });
+    toast.success("Producto eliminado del carrito.");
   };
 
   const montoTotal = cartItems.reduce(
@@ -125,7 +127,7 @@ const Carrito: React.FC = () => {
   );
 
   return (
-    <div className="relative p-8 bg-white rounded-lg shadow-lg border border-gray-200">
+    <div className="relative p-8 bg-white rounded-lg shadow-lg border border-gray-200 max-w-lg mx-auto">
       <h1 className="text-3xl font-extrabold mb-6 text-gray-800 text-center">
         Carrito de Compras
       </h1>
@@ -135,17 +137,30 @@ const Carrito: React.FC = () => {
             Tu carrito está vacío 🛒
           </li>
         ) : (
-          cartItems.map(({ id, name, price, quantity }) => (
+          cartItems.map(({ id, name, price, quantity, imagePath }) => (
             <li
               key={id}
               className="flex justify-between items-center py-3 px-4 border border-gray-300 rounded-md shadow-sm"
             >
-              <span className="font-semibold text-lg text-gray-700">
-                {name}
-              </span>
+              <div className="flex items-center">
+                <img
+                  src={imagePath}
+                  alt={name}
+                  className="w-16 h-16 object-cover rounded-lg mr-3"
+                />
+                <span className="font-semibold text-lg text-gray-700">
+                  {name}
+                </span>
+              </div>
               <span className="text-gray-500">
                 ${Number(price).toFixed(2)} x {quantity}
               </span>
+              <button
+                onClick={() => eliminarDelCarrito(id)}
+                className="text-red-600 hover:text-red-800 ml-4"
+              >
+                Eliminar
+              </button>
             </li>
           ))
         )}

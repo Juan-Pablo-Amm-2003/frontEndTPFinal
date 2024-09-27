@@ -44,6 +44,17 @@ export const fetchProducts = async () => {
   }
 };
 
+export const fetchProductById = async (id: string) => {
+  try {
+    const response = await api.get(`/products/${id}`); // Usa la instancia de Axios
+    return response.data.product; // Accede al objeto product
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    throw error; // Lanza el error para que sea manejado en el componente
+  }
+};
+
+
 // Sales Service
 export const registerSale = async (saleData: object) => {
   try {
@@ -128,13 +139,39 @@ export const updateUser = async (
   updatedUser: User,
   token: string
 ) => {
-  const response = await fetch(`/api/users/${userId}`, {
+  const response = await fetch(`${API_ROUTES.USERS.UPDATE(userId)}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`, // Enviar token con la solicitud
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(updatedUser),
   });
   return response.json();
+};
+
+export const createProduct = async (
+  productData: FormData
+): Promise<AxiosResponse<unknown> | void> => {
+  try {
+    const response = await api.post(API_ROUTES.PRODUCTS.CREATE, productData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response;
+  } catch (error) {
+    const errorMessage = handleError(error).message;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+
+export const deleteProduct = async (id: string) => {
+  try {
+    const response = await api.delete(`/products/${id}`);
+    return response.data; // Maneja la respuesta según sea necesario
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw new Error("Error deleting product");
+  }
 };

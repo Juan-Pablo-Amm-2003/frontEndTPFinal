@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import ProductList from "../pages/products/ProductList";
-import { fetchUsers } from "../Routes/apiService"; // Asegúrate de que fetchProducts no se importe aquí
-import { useNavigate } from "react-router-dom";
+import { fetchUsers } from "../Routes/apiService"; 
+import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 interface User {
@@ -41,14 +41,16 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-blue-700 text-white p-6 text-center shadow-lg">
-        <h1 className="text-5xl font-extrabold">Bienvenido a la Tienda</h1>
+        <h1 className="text-4xl md:text-5xl font-extrabold">
+          Bienvenido a la Tienda
+        </h1>
         {username && (
-          <h2 className="text-3xl mt-2 italic">Hola, {username}!</h2>
+          <h2 className="text-xl md:text-3xl mt-2 italic">Hola, {username}!</h2>
         )}
       </header>
       <main className="container mx-auto py-10 px-4">
         {!token && (
-          <p className="text-center text-red-600 text-lg mb-8">
+          <p className="text-center text-red-600 text-base md:text-lg mb-8">
             Inicia sesión para acceder a todas las funciones.
           </p>
         )}
@@ -57,13 +59,16 @@ const HomePage: React.FC = () => {
         </section>
         {isAdmin && (
           <div className="text-center mt-8">
-            <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded transition-colors">
-              Agregar Producto (solo admin)
-            </button>
+            <Link
+              to="/adminHome"
+              className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded transition"
+              aria-label="Admin Dashboard"
+            >
+              Admin Dashboard
+            </Link>
           </div>
         )}
       </main>
-
     </div>
   );
 };

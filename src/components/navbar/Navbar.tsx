@@ -1,13 +1,12 @@
-// Navbar.tsx
 import React, { useState } from "react";
-import { useCart } from "../cartContext";
+import { useCart } from "../cartContext"; // Asegúrate de que la ruta sea correcta
 import { Link } from "react-router-dom";
-import { FiShoppingCart, FiChevronDown } from "react-icons/fi";
+import { FiShoppingCart, FiChevronDown, FiTrash } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { state } = useCart();
+  const { state, removeFromCart } = useCart(); // Usa el hook useCart
   const cartItems = state.cartItems || [];
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -15,14 +14,14 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="relative bg-gray-900 text-white px-4 py-4 shadow-md">
-      <div className="flex justify-between items-center max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
         <Link
           to="/"
           className="text-2xl font-bold tracking-wide hover:text-blue-400 transition-colors"
         >
           MyShop
         </Link>
-        <div className="relative">
+        <div className="relative mt-2 md:mt-0">
           <button
             onClick={toggleCart}
             aria-haspopup="true"
@@ -64,21 +63,34 @@ const Navbar: React.FC = () => {
                         key={item.id}
                         className="flex items-center justify-between"
                       >
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-16 h-16 object-cover rounded-lg"
-                        />
-                        <div className="ml-3">
-                          <span className="block text-gray-700 font-semibold">
-                            {item.name}
-                          </span>
-                          <span className="text-gray-500">
-                            ${item.price} x {item.quantity}
-                          </span>
+                        <div className="flex items-center">
+                          <img
+                            src={item.imagePath}
+                            alt={item.name}
+                            className="w-16 h-16 object-cover rounded-lg"
+                            onError={(e) => {
+                              e.currentTarget.src =
+                                "ruta/por/defecto/imagen.png"; // Imagen por defecto
+                            }}
+                          />
+                          <div className="ml-3">
+                            <span className="block text-gray-700 font-semibold">
+                              {item.name}
+                            </span>
+                            <span className="text-gray-500">
+                              ${item.price} x {item.quantity}
+                            </span>
+                          </div>
                         </div>
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          className="ml-2 text-red-600 hover:text-red-800"
+                        >
+                          <FiTrash />
+                        </button>
                       </li>
                     ))}
+
                     <p className="text-right text-lg font-bold text-gray-800">
                       Total: $
                       {cartItems
